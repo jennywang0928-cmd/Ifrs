@@ -5,6 +5,7 @@ parse 資料夾內：manual_*.tsv（第一輪判讀）、deep_*.tsv（第二輪�
 """
 import glob, json, re, sys
 from contact_phone import find_phone
+from contact_rank import pick, salutation
 
 P, SN, SND, OUT, REPORTS, CT, CTD = sys.argv[1:8]
 EMAIL = re.compile(r'[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}')
@@ -32,7 +33,9 @@ for path in (CT, CTD):
 merged = {}
 # 第二輪先放，第一輪有判讀到的覆蓋（第一輪找到的頁面通常就是報告書聯絡資訊頁）
 for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pages[CT], rows('manual_*.tsv'))):
-    for code, (dept, title, name) in data.items():
+    for code, (dept0, title0, name0) in data.items():
+        # 多位聯絡人只留職級最高者、一人多職稱只留最高職稱；被移除的寫進 notes（Excel 用註解標示）
+        dept, title, name, notes = pick(dept0, title0, name0)
         s = src.get(code, {})
         text = (s.get('snip') or '').replace('＠', '@')
         found = []
@@ -53,10 +56,12 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                 if near:
                     found = [near] + [e for e in found if e != near]
         phone = find_phone(full.get(code, ''), found or filed, names)
-        merged[code] = (dept, title, name, '; '.join(found), str(s.get('page', '')), phone)
+        sur, stitle, unsure = salutation(title, name)
+        merged[code] = (dept, title, name, '; '.join(found), str(s.get('page', '')), phone,
+                        ' / '.join(notes), sur, stitle, '1' if unsure else '')
 
 with open(OUT, 'w', encoding='utf-8') as f:
-    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\n')
+    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\n')
     for code in sorted(merged):
         f.write(code + '\t' + '\t'.join(merged[code]) + '\n')
 print('contacts', len(merged), 'with name', sum(1 for v in merged.values() if v[2]),

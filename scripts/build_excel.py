@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from contact_phone import PHONE, FW  # noqa: E402
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.comments import Comment
 from openpyxl.utils import get_column_letter
 
 DATA, OUT = sys.argv[1], sys.argv[2]
@@ -64,8 +65,10 @@ if os.path.exists(f'{DATA}/contacts_parsed.tsv'):
     with open(f'{DATA}/contacts_parsed.tsv', encoding='utf-8') as f:
         next(f)
         for line in f:
-            code, dept, title, name, pdf_emails, page, phone = line.rstrip('\n').split('\t')
-            contacts[code] = dict(dept=dept, title=title, name=name, pdf_emails=pdf_emails, page=page, phone=phone)
+            code, dept, title, name, pdf_emails, page, phone, notes, sal_sur, sal_title, sal_unsure = \
+                line.rstrip('\n').split('\t')
+            contacts[code] = dict(dept=dept, title=title, name=name, pdf_emails=pdf_emails, page=page, phone=phone,
+                                  notes=notes, sal_sur=sal_sur, sal_title=sal_title, sal_unsure=sal_unsure)
 
 
 def filed_phone(text):
@@ -73,7 +76,7 @@ def filed_phone(text):
     m = PHONE.search((text or '').translate(FW))
     return re.sub(r'\s+', ' ', m.group(0)).strip(' -') if m else ''
 
-rows = []
+rows, notes_by_row = [], []
 for code in sorted(set(companies) | set(reports)):
     c = companies.get(code, {})
     r = reports.get(code)
@@ -92,6 +95,17 @@ for code in sorted(set(companies) | set(reports)):
         source = '公司信箱（報告書未填 email）' if r else '公司信箱（查無本年度永續報告書）'
     else:
         send, source = [], '查無 email，需人工補'
+    # W 欄需確認事項：🔴 必須處理、🟡 建議確認（網址無效在做超連結時再補）
+    check = []
+    if not send:
+        check.append('🔴 查無 email，需人工補')
+    elif source.startswith('公司信箱'):
+        check.append('🟡 改用公司總信箱，建議查有無 ESG 窗口')
+    if len(pdf) > 1 and not ct.get('name'):
+        # 有聯絡人姓名時，F 欄已取緊接在姓名後的 email，不必再確認
+        check.append('🟡 報告書列多個 email，請確認 F 欄')
+    if ct.get('sal_unsure'):
+        check.append('🟡 四字姓名，請確認稱呼姓')
     rows.append([
         code,
         c.get('short') or (r or {}).get('shortName', ''),
@@ -113,12 +127,16 @@ for code in sorted(set(companies) | set(reports)):
         (c.get('web') or '').strip().strip('　'),
         ct.get('phone') or filed_phone((r or {}).get('contactInfo')),
         c.get('phone', ''),
+        ct.get('sal_sur', ''),
+        ct.get('sal_title', ''),
+        '；'.join(check),
     ])
+    notes_by_row.append(ct.get('notes', ''))
 
 headers = ['公司代號', '公司簡稱', '公司名稱', '市場', '產業', '建議寄送 email（對應聯絡人）', 'email 來源',
            '聯絡人部門', '聯絡人職稱', '聯絡人姓名',
            '永續報告書聯絡 email（申報資料）', '報告書內文聯絡 email', '公司信箱 (發言人/IR)', '永續報告書聯絡資訊原文', '聯絡資訊在報告書第幾頁', '報告期間',
-           '永續報告書網址', '公司網址', '聯絡人電話（報告書）', '公司總機電話']
+           '永續報告書網址', '公司網址', '聯絡人電話（報告書）', '公司總機電話', '稱呼姓', '稱呼職稱', '需確認事項']
 
 wb = Workbook()
 ws = wb.active
@@ -131,6 +149,8 @@ for cell in ws[1]:
     cell.font = Font(bold=True, color='FFFFFF')
     cell.fill = head_fill
     cell.alignment = Alignment(vertical='center', wrap_text=True)
+warn = PatternFill('solid', fgColor='FFF2CC')
+bad = PatternFill('solid', fgColor='F8CBAD')
 # Q、R 欄（永續報告書網址、公司網址）做成可點的超連結
 for col in (headers.index('永續報告書網址') + 1, headers.index('公司網址') + 1):
     for i in range(2, len(rows) + 2):
@@ -141,20 +161,36 @@ for col in (headers.index('永續報告書網址') + 1, headers.index('公司網
         url = re.sub(r'^h+ttp', 'http', url, flags=re.I)
         url = re.sub(r'^(https?)//', r'\1://', url, flags=re.I)
         if not url or '.' not in url or not re.match(r'(https?:)?//|www\.|[\w-]+\.', url, re.I):
+            if col == headers.index('永續報告書網址') + 1 and cell.value:
+                w = ws.cell(i, headers.index('需確認事項') + 1)
+                w.value = '；'.join(x for x in (w.value, '🔴 永續報告書網址無效') if x)
             continue
         cell.value = url
         if not re.match(r'https?://', url, re.I):
             url = 'https://' + url.lstrip('/')
         cell.hyperlink = url
         cell.style = 'Hyperlink'
-warn = PatternFill('solid', fgColor='FFF2CC')
-bad = PatternFill('solid', fgColor='F8CBAD')
 for i, row in enumerate(rows, start=2):
     if row[6].startswith('公司信箱'):
         ws.cell(i, 7).fill = warn
     elif row[6].startswith('查無'):
         ws.cell(i, 7).fill = bad
-widths = [9, 12, 30, 6, 14, 36, 26, 28, 24, 20, 36, 36, 30, 50, 12, 22, 40, 34, 28, 16]
+# 被移除的聯絡人、職稱用註解標在 I、J 欄
+for i, note in enumerate(notes_by_row, start=2):
+    for part in filter(None, note.split(' / ')):
+        col = 10 if part.startswith('報告書另列聯絡人') else 9
+        cell = ws.cell(i, col)
+        text = (cell.comment.text + '\n' if cell.comment else '') + part
+        cell.comment = Comment(text, '整理說明', width=320, height=90)
+# 需確認事項依等級上色
+wcol = headers.index('需確認事項') + 1
+for i in range(2, len(rows) + 2):
+    v = ws.cell(i, wcol).value or ''
+    if '🔴' in v:
+        ws.cell(i, wcol).fill = bad
+    elif '🟡' in v:
+        ws.cell(i, wcol).fill = warn
+widths = [9, 12, 30, 6, 14, 36, 26, 28, 24, 20, 36, 36, 30, 50, 12, 22, 40, 34, 28, 16, 10, 14, 44]
 for i, w in enumerate(widths, start=1):
     ws.column_dimensions[get_column_letter(i)].width = w
 ws.freeze_panes = 'C2'
@@ -186,7 +222,10 @@ for line in [
     ['永續報告書網址／公司網址', 'Q、R 欄可直接點擊開啟；公司申報時打錯的網址格式（空格、全形冒號等）已自動修正'],
     ['聯絡人電話（報告書）', '報告書聯絡段落的電話（含分機，已排除傳真）；報告書沒寫的改用申報資料聯絡資訊中的電話；都沒有就留空，可看 T 欄總機'],
     ['email 來源', '黃色＝改用公司信箱；橘色＝查無 email，需人工補'],
-    ['聯絡人姓名', '報告書只寫「王先生／陳小姐」的照原文保留；多位聯絡人以頓號分隔，職稱以分號對應'],
+    ['聯絡人（H～J 欄）', '報告書列多位聯絡人時只留職級最高者；一人多個職稱只留最高的（例：發言人暨總經理 → 總經理）。被移除的寫在 I、J 欄的註解（儲存格右上角紅色三角形）'],
+    ['職級順序', '董事長 > 總經理/執行長 > 副總經理/財務長/永續長 > 協理/總監/處長 > 經理/副理 > 課長/主任/組長 > 專員/秘書/特助 > 發言人/公司治理主管/執行秘書等角色'],
+    ['稱呼姓／稱呼職稱（U、V 欄）', '信件開頭用「U+V」，例：王經理、劉小姐、廖執行秘書；英文名只填名字（信件用「Wendy 您好」）；兩欄都空白時信件用「您好」'],
+    ['需確認事項（W 欄）', '🔴 必須處理（紅底）、🟡 建議確認（黃底）；空白代表不需處理'],
     ['報告書內文聯絡 email', '報告書 PDF 聯絡資訊段落裡寫的 email；少數公司申報資料填的 email 和報告書內文不同，部門/職稱/姓名是依報告書內文'],
     ['永續報告書聯絡資訊原文', '公司申報時填寫的原文，有些只留電話或網址，可參考後人工補 email'],
     [],
