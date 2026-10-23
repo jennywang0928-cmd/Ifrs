@@ -5,7 +5,8 @@ parse 資料夾內：manual_*.tsv（第一輪判讀）、deep_*.tsv（第二輪�
 """
 import glob, json, re, sys
 from contact_phone import find_phone
-from contact_rank import pick, salutation
+from contact_rank import pick, salutation, surname
+from contact_gender import from_report, from_email, conflicts
 
 P, SN, SND, OUT, REPORTS, CT, CTD = sys.argv[1:8]
 EMAIL = re.compile(r'[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}')
@@ -57,11 +58,25 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                     found = [near] + [e for e in found if e != near]
         phone = find_phone(full.get(code, ''), found or filed, names)
         sur, stitle, unsure = salutation(title, name)
+        gender_note = ''
+        if not sur and name and not re.match(r'[A-Za-z]', name):
+            # 只有姓名、沒有可用職稱：報告書原文寫明先生/小姐，或 email 英文名可判斷時才填，否則信件用「您好」
+            g = from_report(full.get(code, ''), name)
+            if not g:
+                s0, _ = surname(name)
+                g, en = from_email((found or filed or [''])[0], s0)
+                if g and conflicts(name, g):
+                    g = ''
+                if g:
+                    gender_note = f'依 email 英文名「{en}」判斷為{g}'
+            if g:
+                sur, unsure = surname(name)
+                stitle = g
         merged[code] = (dept, title, name, '; '.join(found), str(s.get('page', '')), phone,
-                        ' / '.join(notes), sur, stitle, '1' if unsure else '')
+                        ' / '.join(notes), sur, stitle, '1' if unsure else '', gender_note)
 
 with open(OUT, 'w', encoding='utf-8') as f:
-    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\n')
+    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\tsal_note\n')
     for code in sorted(merged):
         f.write(code + '\t' + '\t'.join(merged[code]) + '\n')
 print('contacts', len(merged), 'with name', sum(1 for v in merged.values() if v[2]),

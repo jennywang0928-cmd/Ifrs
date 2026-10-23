@@ -1,6 +1,7 @@
 // 從證交所 ESG InfoHub 的永續報告書 PDF 擷取「報告書聯絡資訊」那一頁的文字。
 // PDF 很大、連線很慢，所以用 pdf.js + HTTP Range 只讀需要的頁面，依「最可能出現聯絡資訊」的順序逐頁找，找到就停。
 // 用法: node extract_contacts.mjs <reports.json> <輸出.jsonl> [平行數]
+// 稱呼性別判斷需要 Python 套件：pip install pypinyin
 // 需要: npm i pdfjs-dist@4.10.38 undici@6.21.1
 import { getDocument, PDFDataRangeTransport } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { ProxyAgent, request } from 'undici';
