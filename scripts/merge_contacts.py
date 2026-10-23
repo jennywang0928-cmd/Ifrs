@@ -12,6 +12,33 @@ P, SN, SND, OUT, REPORTS, CT, CTD = sys.argv[1:8]
 EMAIL = re.compile(r'[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}')
 
 
+TLD = r'(?:tw|com|net|org|cn|jp|hk|sg|co|asia|us|biz|global|info|io)'
+
+
+def fix_emails(text):
+    """抓 email，並修正 PDF 文字裡 email 被空格切斷的情況：
+    「thomas _chen@x.com」→ thomas_chen@x.com、「pcchen@sinkang.com.t w」→ pcchen@sinkang.com.tw
+    """
+    squeezed = EMAIL.findall(re.sub(r'(?<=[\x21-\x7e]) (?=[\x21-\x7e])', '', text))
+    out = []
+    for e in EMAIL.findall(text):
+        for q in squeezed:
+            if q == e or e not in q:
+                continue
+            extra_front, extra_back = q[:q.index(e)], q[q.index(e) + len(e):]
+            # 前面被切斷：原本抓到的帳號以 . _ - 開頭
+            if extra_front and not extra_back and e[:1] in '._-' and '@' not in extra_front:
+                e = q
+                break
+            # 後面被切斷：只多了一小段網域（.tw、w）
+            if extra_back and not extra_front and len(extra_back) <= 4 and re.fullmatch(r'[a-z.]*', extra_back.lower()) \
+                    and re.search(r'\.' + TLD + r'$', q.lower()):
+                e = q
+                break
+        out.append(e)
+    return out
+
+
 def load_snips(path):
     return {r['code']: r for r in map(json.loads, open(path, encoding='utf-8'))}
 
@@ -40,7 +67,7 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
         s = src.get(code, {})
         text = (s.get('snip') or '').replace('＠', '@')
         found = []
-        for e in EMAIL.findall(text):
+        for e in fix_emails(text):
             # 電話號碼和 email 黏在一起時（02-8227-3827abc@x.com），去掉前面的電話
             e = re.sub(r'^(?:\d+-)+\d+(?=[A-Za-z])', '', e)
             if e.lower() not in found:

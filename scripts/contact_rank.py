@@ -111,6 +111,8 @@ def salutation(title, name):
         return '', '', False
     sur, unsure = surname(n)
     t = '執行秘書' if '執行秘書' in title else _full_title(_core(title, kw))
+    if t in NOT_SALUTATION:
+        return '', '', False
     return sur, t, unsure
 
 
@@ -122,4 +124,9 @@ def _core(title, kw):
 
 
 def _full_title(t):
-    return re.sub(r'副總$', '副總經理', t)
+    t = re.sub(r'副總$', '副總經理', t)
+    return '特別助理' if t == '特助' else t
+
+
+# 這些不適合接在姓後面當信件稱呼（王Administrator、張股務），改走先生／小姐判斷或「您好」
+NOT_SALUTATION = {'Administrator', '股務', '編輯', '代表', '助理'}

@@ -63,7 +63,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 1438	永續專案小組			yufoongb@ms37.hinet.net	4	(07)225-9599分機334					
 1439		公司治理主管	葉品卉	ir@ascentglobal.com.tw	4	(02)2756-6777					
 1440	行政管理部		黃煥仁	csr@tainanspin.com.tw	4	(06) 237-6161		黃	先生		
-1441	永續發展委員會			esg@tahtong.com.tw	4						
+1441	永續發展委員會			esg@tahtong.com.tw	4	+886-2-27522244					
 1444			洪小姐	hung0612@lipeng.com.tw	9	02-2100-2888		洪	小姐		
 1445	永續辦公室			anderson@universal-tex.com	5	02-25523977 分機 709					
 1446	管理部	經理	陳永祿	u1692@hongho.com.tw	4	06-2333133#301		陳	經理		
@@ -115,10 +115,10 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 1537	總經理室	協理	陳志雄	joe@mail.klb.com.tw	11	+886-49-2254-777#117		陳	協理		
 1538	永續發展小組	財務長	葉璨增		10	(03)4904111 # 306	原職稱：發言人、財務長	葉	財務長		
 1539	永續發展辦公室		陳志濱	main02@geetech.com.tw	3	04-2270-0258					
-1540	總經理室	特助	陳文助	misc@johnford.com.tw	8			陳	特助		
+1540	總經理室	特別助理	陳文助	misc@johnford.com.tw	8		原職稱：特助	陳	特別助理		
 1541	總經理室	發言人	賈雨翰	dallas_chia@mail.toty.com.tw	3	(04)2558-0669		賈	先生		依 email 英文名「dallas」判斷為先生
 1558	永續發展辦公室	副理	曾善美	csr@zenghsing.com.tw	2	886-4-2278-5177		曾	副理		
-1560		Administrator	王子苡	tzuyi@kinik.com.tw	5	+886-2-2679-1931 #1214		王	Administrator		
+1560		Administrator	王子苡	tzuyi@kinik.com.tw	5	+886-2-2679-1931 #1214					
 1563		發言人		admin@superalloy.tw	5	05-5512288					
 1565	管理部	經理	周育俞	s4200@stshine.com.tw	8	02-86916000#188		周	經理		
 1568		發言人		sharontsai@tsangyow.com.tw	7	(05)2200-888 分機 1130					
@@ -147,7 +147,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 1615	管理部		孫忠宏	ydwu@dahsan.com.tw	3	05-5222333 分機:1161					
 1616	管理部	經理	陳逸坤	esg01@evertop.com	4	03-4253111		陳	經理		
 1617	永續發展委員會			chou@nt1.jswire.com.tw	4	06-2705211 #230					
-1618	永續長室	特助	李東晏	li-00689@hold-key.com.tw	4	03-4838126#222		李	特助		
+1618	永續長室	特別助理	李東晏	li-00689@hold-key.com.tw	4	03-4838126#222	原職稱：特助	李	特別助理		
 1623	永續辦公室		林姿君	aily@tewc.com.tw	5	03-4818138		林	小姐		
 1626	集團投資關係室	經理	莊亞菘	yasung@airmate-china.net	7	+886-2-27003626		莊	經理		
 1702	永續發展暨ESG委員會執行秘書處		莊俐琴	csr@namchow.com.tw	7	(02)6619-3274		莊	小姐		
@@ -218,7 +218,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 2028	廠務處	處長	沈宏哲	shj96012@weichih.com.tw	4	06-5790213		沈	處長		
 2029	企業社會責任委員會			yx_chen@shengyusteel.com	7	07-8719000 分機:144					
 2031		副總經理	劉百慧	hkssteel@ms4.hinet.net; irp_mail@hksteel.com.tw	4	+886-2-2978-8888	原職稱：公司治理主管、副總經理	劉	副總經理		
-2032		總經理	成主賜	pcchen@sinkang.com	5		原職稱：發言人、總經理	成	總經理		
+2032		總經理	成主賜	pcchen@sinkang.com.tw	5	(02)2202-0152 分機:2006	原職稱：發言人、總經理	成	總經理		
 2033				ct100@ms33.hinet.netchapter	5						
 2034	永續發展委員會			esg@ycinox.com	3	+886-4-889-9666 分機 620					
 2035	企劃處			tecsr@mail.tangeng.com.tw	6	(07)802-2811 分機 1551、1556、1557					
@@ -242,7 +242,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 2109	行政部	部長	洪世益	yi@duro.com.tw	5	(04)8520141 分機23100		洪	部長		
 2115	總經理室		陳姷希	luhai.lhh@luhai.com.tw	4	(04)874-8122					
 2201		副理	洪美滿	esg@yulon-motor.com.tw	3	+886-37-871801		洪	副理		
-2204	永續發展（ESG）委員會	報告書編輯	傅敏綸	anny.fu@china-motor.com; lisa.lee@china-motor.com	5	03-4783191 分機 2316、2346	報告書另列聯絡人：李莉沙 報告書編輯	傅	編輯		
+2204	永續發展（ESG）委員會	報告書編輯	傅敏綸	anny.fu@china-motor.com; lisa.lee@china-motor.com	5	03-4783191 分機 2316、2346	報告書另列聯絡人：李莉沙 報告書編輯				
 2206	環境保護管理室			esg@sym.com.tw	7	+886-3-5981911#1722					
 2208	企劃處			123864@csbcnet.com.tw	3	07-8059888 分機 2897					
 2211				csr@evergreennet.com	5	02-25135858 分機 5725					
@@ -318,8 +318,8 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 2401	ESG辦公室			ir@sunplus.com	4	+886-3-5786005					
 2402	ESG永續小組			ichia.ir@ichia.com	3	+886-3-397-3345					
 2404	永續發展窗口			nina@uisco.com.tw	6	02-29174060分機:8505					
-2405	永續發展小組			esg@tw.shuttle.com	4						
-2406		總經理特助	曾國暉	brian@gigastorage.com.tw	2	886-3-598-5510 #5301		曾	特助		
+2405	永續發展小組			esg@tw.shuttle.com	4	886-2-87926168					
+2406		總經理特助	曾國暉	brian@gigastorage.com.tw	2	886-3-598-5510 #5301		曾	特別助理		
 2409	企業永續發展策略處			csr@auo.com	3	+886-3-500-8800 #501890					
 2412	企業溝通處			chtcsr@cht.com.tw	2	(02)2344-3699					
 2413			王靜儀	serena.wang@umec.com.tw	5			王	小姐		依 email 英文名「serena」判斷為小姐
@@ -471,7 +471,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 2897	企業永續暨溝通處			csrfeedback@o-bank.com	4	+886-2-8752-7000 #13307					
 2901		經理	甘經理		5	02-2521-2211 分機 331		甘	經理		
 2903	經營分析組		王明倫	csr@feds.com.tw	4	02-7727-8168					
-2904				ir@pocs.com.tw	8						
+2904				ir@pocs.com.tw	8	(02) 2717-4317#618					
 2905	永續發展辦公室	經理	林瑾杰	jay.lin@mercuries.com.tw	4	(02)2503-1111 # 2503		林	經理		
 2906	公司治理課			esg@collins.com.tw	3	(02) 2712-5311 #300					
 2908	公司治理及永續發展執行委員會		單小姐	alison.shan@testritegroup.com	7	(02) 8791-6053		單	小姐		
@@ -638,7 +638,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 3380				public@alphanetworks.com	5	+886-3-563-6666					
 3388					4						
 3390	管理部		李春貴	lee@mail.sunflex.com.tw	8	03-222-0998					
-3406		特助	趙志強	mcgwire.chao@gseo.com	4			趙	特助		
+3406		特別助理	趙志強	mcgwire.chao@gseo.com	4		原職稱：特助	趙	特別助理		
 3413	企業永續發展推展中心			fiti.csr@foxsemicon.com	5						
 3416	總管理處		焉先生	csr@winmate.com.tw	3	02-8511-0288		焉	先生		
 3419				ir@whayu.com	4	886-3-5714225 分機:1212					
@@ -646,7 +646,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 3432			鄭小姐		4			鄭	小姐		
 3434	永續發展部	經理	陳捷吟	annachen@acula.com.tw	4	03-313-5577 #110		陳	經理		
 3437	永續發展部門			aot.esg@aot.com.tw	6	(03)5976988					
-3438	總經理室	特助	卓特助	ir@aatech.com.tw	8	(03)620-9588		卓	特助		
+3438	總經理室	特別助理	卓特助	ir@aatech.com.tw	8	(03)620-9588	原職稱：特助	卓	特別助理		
 3441			王燕紅	livia_w@t-unique.com	7	049-2323825分機 189					
 3443	永續發展部			esg@guc-asic.com	4	+886-3-5646600					
 3444				esg@niching.com.tw	3	+886-4-23588966 分機:61163					
@@ -654,7 +654,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 3450				elaser@elaser.com.tw	5	+886-2-8245-6186					
 3455	ESG推動辦公室		蔡先生		3		報告書另列聯絡人：何小姐	蔡	先生		
 3465		財務長	李智賢	official@naeaudio.com	6	(07)229-1788		李	財務長		
-3466	ESG小組	協理	黃協理	info@skardin.com.twemail	5			黃	協理		
+3466	ESG小組	協理	黃協理	info@skardin.com.twemail	5	02-85123068		黃	協理		
 3467				ir@forcera.com.tw	13	+886-3-5696800					
 3479	ESG辦公室			esg@avalue.com	11	+886-2-8226-2345					
 3481	永續報告書編輯小組			csr@innolux.com	4	+886-6-505-1888					
@@ -723,7 +723,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 3623	經營管理處			service@transtouch.com.tw	3	(03)3978800					
 3624	企業永續經營小組			nicoleyang@viking.com.tw	3	03-5972931#5411、03					
 3625	財會統合處	處長	李宗嶽	joe.lee@c-techone.com	8	(02)2901-6600	原職稱：發言人、處長	李	處長		
-3628		董事長特助	趙順德	ablerex.service@ablerex.com.tw	3	02-2917-6857		趙	特助		
+3628		董事長特助	趙順德	ablerex.service@ablerex.com.tw	3	02-2917-6857		趙	特別助理		
 3629			葉先生	zackyeh@gravitytw.com	3	02-2747-0958		葉	先生		
 3631	財務部		張春華	cntw.fdm@chernan.com	4	(02)8209-2883					
 3632		發言人	陳柏任	stockholder@papagoinc.com	14	(02)8751-0123					
@@ -742,7 +742,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 3680		永續長	游禮志	randy.yu@gudeng.com	5	+886-2-2268-9141 #61506		游	永續長		
 3684	ESG永續推行小組			esg@grand-tek.com	9	02-2917-7353					
 3686	永續發展小組			pr@danentech.com	10	03-6686361					
-3687	行政部	經理	顏怡慧	esg@macrowell.com.tw	10			顏	經理		
+3687	行政部	經理	顏怡慧	esg@macrowell.com.tw	10	02-2655 0051 # 1601		顏	經理		
 3691	總經理室			ir@gigasolar.com.tw	9	03-5981886					
 3693			錢靜怡	joan.chien@aicipc.com.tw	3	03-313-8386		錢	小姐		依 email 英文名「joan」判斷為小姐
 3694			李瓊如	vicky.li@azurewave.com	8	(02)5599-5599		李	小姐		依 email 英文名「vicky」判斷為小姐
@@ -764,13 +764,13 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 4104		公司治理主管			4						
 4105	財務部		榮小姐	csr@tty.com.tw	7	02-2652-5999 分機:2121		榮	小姐		
 4106				ir@wellell.com	3	02-2268-5568					
-4107		秘書	廖慧萍	peggieliao@bioteq.com.tw	4			廖	秘書		
+4107		秘書	廖慧萍	peggieliao@bioteq.com.tw	4	02-2571-0269 *1223		廖	秘書		
 4108	永續發展統籌小組			service@phytohealth.com.tw	4	(02)2545-3697#2328					
 4109	管理部－報告書編輯小組			chiajei@jiajiebio.com	4						
 4111			伍世瑋	w.shr.wei@cscp.com.tw	6	03-5983811#354					
 4114	ESG辦公室			esg@synmosa.com.tw	4	+886-2-8797-7100					
 4116	永續發展委員會		陳光偉	csr@benqmedicaltech.com	2	02-8797-5533 ext.5930					
-4119		總經理特助	陳念妤	nelly.chen@sci-pharmtech.com.tw	7	+886-3-354-3133		陳	特助		
+4119		總經理特助	陳念妤	nelly.chen@sci-pharmtech.com.tw	7	+886-3-354-3133		陳	特別助理		
 4120	營運服務中心			esg@oepgroup.com	8	02-2755-4881ext.2268					
 4123	企業永續委員會			esg@centerlab.com.tw	4	02-2655-8680					
 4126	法務處		馬瓊如	catherinem@pahsco.com.tw	5	+886 2 2895 5050					
@@ -789,7 +789,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 4155	財務部	協理	侯奇政	stevenho@okbiotech.com	3	(03)516-0258	原職稱：協理（兼任公司治理主管）	侯	協理		
 4157	董事長室			vice@taigenbiotech.com	3						
 4160	永續發展小組		康清原	gga@gga.asia	9	(02) 2795-1777					
-4161	董事長室	董事長特助	王羿庭	diane@bioptik.com.tw	7	886-37-626699#148		王	特助		
+4161	董事長室	董事長特助	王羿庭	diane@bioptik.com.tw	7	886-37-626699#148		王	特別助理		
 4163	永續發展推動小組	祕書	吳小姐	esg@mail.intai.com.tw	13	(04)2359-5336#21399		吳	小姐		
 4164	企業永續委員會			ir@chcg.com	3	(02)6608-1999 分機 755					
 4166				op@oppharma.com	5	02-23257621					
@@ -836,7 +836,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 4530		發言人	李修瀚	ja.lee@honyigroup.com	5	(02)2606-8111					
 4532	行政與人力資源中心	總監	余總監	see0705@rechi.com	6	+886-3-4837201 分機 245		余	總監		
 4533	永續發展委員會			spokesman@seyi.com	4	+886-3-352-5466					
-4534		財務長	魏雅玲	amy@trinity-ptc.com	6			魏	財務長		
+4534		財務長	魏雅玲	amy@trinity-ptc.com	6	+886-37-626123 分機 2000		魏	財務長		
 4536	總經理室			esg@topkey.com.tw	4	04-2359-1229 分機:2192					
 4538	管理部			angel@wsmc.com.tw	12	04-7813032					
 4540	經營管理中心	協理	江協理		4	+886-2-2689-2689		江	協理		
@@ -875,7 +875,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 4714			趙英助	ub1234@ms12.hinet.net	5	06-5920381					
 4716	永續發展委員會	總經理	楊文忠	dlvipd@mail.daily-polymer.com; dlvipf@mail.daily-polymer.com	4	07-6221345	報告書另列聯絡人：許翰林 副總經理	楊	總經理		
 4720	企業永續委員會		劉書妤	ir@texyear.com	6	+886-2-2299-2121					
-4721	總經理室	特助	王崇懿	tom.wang@mechema.com	4	(03)4833788	原職稱：特助（公司代理發言人）	王	特助		
+4721	總經理室	特別助理	王崇懿	tom.wang@mechema.com	4	(03)4833788	原職稱：特助（公司代理發言人）	王	特別助理		
 4722		協理	何印唐	ytho@qualipoly.com.tw	4	+886-7-6236199	原職稱：協理（公司發言人、ESG企業永續）	何	協理		
 4726				ir_esg@mycenax.com	3	(02) 26558951					
 4728	策略發展室	經理	蔡嘉禛	esg@sunmaxbiotech.com	9	06-5053288		蔡	經理		
@@ -894,7 +894,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 4764		總經理	陳仲平	esg@dbc.com.tw	4	02-8228-1168	原職稱：發言人、總經理	陳	總經理		
 4766	永續發展室			esg@nanpao.com	4	+886-6-796-5888 #1181					
 4767	行政部		林劍青	ct4767@mail.cherngtay.com	3	+886-7-6955222					
-4768		處長	張永宏	tony@ingenteccorp.com	4	+886-37-585-218 分機 301	原職稱：碳盤查管理代表、處長	張	處長		
+4768		處長	張永宏	tony@ingenteccorp.com.tw	4	+886-37-585-218 分機 301	原職稱：碳盤查管理代表、處長	張	處長		
 4770	永續發展統籌組			honey@alliedsupreme.com	10	04-7582827 分機 1402、1406、1408					
 4771					4	037-582-900					
 4772	企業永續發展委員會		許先生	pub_esg@tscs.com.tw	3	04-7911072		許	先生		
@@ -1024,7 +1024,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 5452	總管理處 永續發展小組			esg@unicgroup.com	3	02-2269-6669					
 5457				st-ir@speedtech.com.tw	5						
 5460	管理部		楊宗翰	txglb@mustang-group.com	7	(02)2202-2241					
-5464	總經理室	特助	周特助	jason@lhtech.com.tw	5	05-2216696 # 6316		周	特助		
+5464	總經理室	特別助理	周特助	jason@lhtech.com.tw	5	05-2216696 # 6316	原職稱：特助	周	特別助理		
 5465	永續發展委員會		吳小姐	linda-wu@lfe.com.tw	7	(03)3269123#3376		吳	小姐		
 5468	總經理室			kuanta.chen@tmtech.com.tw	5	06-3843158					
 5469				csr@hannstarboard.com	4	+886-3-483-8500					
@@ -1113,7 +1113,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 6144				csr@deltamac.com.tw	13	+886-2-25962866					
 6146	財務部	財務部協理	潘鳳雯	grace@sporton.com.tw; davidchou@sporton.com.tw	5	(02)26962468 分機 255	報告書另列聯絡人：周煒哲 董事長室特別助理	潘	協理		
 6147				esg@chipbond.com.tw	5	+886-3-5678788					
-6152	企業永續發展委員會	永續長	梁先生	anderson@pesi.com.tw	4			梁	先生		
+6152	企業永續發展委員會	永續長	梁先生	anderson@pesi.com.tw	4	+886-3-461-5000 分機 606		梁	先生		
 6154	財務部	經理	楊經理	11228@sunfar.com.tw	4	886-7-236-6221		楊	經理		
 6156	永續發展小組			investors@song-shang.com	5	(02)2268-6867					
 6158	經營企劃室		陳慶芳	vincent.chen@p-two.com.tw	7	03-3769999					
@@ -1181,8 +1181,8 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 6240	總管理處			tiffany@kingsinfo.com.tw	4						
 6242	總經理室	專員	廖明毅	bright@herbalmed.com.tw	7	06-2337068# 1201		廖	專員		
 6243	總經理室	處長	詹筱秦	sharon@ene.com.tw	6	03-6662888*3217		詹	處長		
-6244	董事長室	公司治理主管	陳堅棟	_chen@motech.com.tw	5	02-26625093 #207					
-6245		董事長特助	周旭輝	sd_office@lannerinc.com	10	02-8692-6060		周	特助		
+6244	董事長室	公司治理主管	陳堅棟	thomas_chen@motech.com.tw	5	02-26625093 #207		陳	先生		依 email 英文名「thomas」判斷為先生
+6245		董事長特助	周旭輝	sd_office@lannerinc.com	10	02-8692-6060		周	特別助理		
 6246		副總經理	高宏成		10	+886-2-2277-2828	原職稱：副總	高	副總經理		
 6248	管理部－ESG報告書編輯小組			tmp@tmpco.com.tw	5	(04)753-0578					
 6257	永續發展管理中心			esg@sigurd.com.tw	4	03-5959213#1210					
@@ -1195,7 +1195,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 6270	總管理處 管理部－永續發展小組			public@pct.com.tw	2	02-26980098 ext:220					
 6271	永續辦公室			esg@theil.com	3	03-5535888					
 6274	公司治理室			ian.huang@tuc.com.tw	4	035551103分機:116					
-6276	永續發展推動小組		羅淑惠		3						
+6276	永續發展推動小組		羅淑惠		3	(02) 2799-0022#523					
 6277	總經理室	課長	丁課長	csr@aten.com	4	+886-2-8692-6789		丁	課長		
 6279	永續發展處		李素美	esg@hulane.com.tw	6	(02)2694-0551 #60005					
 6281	財務暨會計處			lori.chao@elifemall.com.tw	4	(02)2298-9922 分機 2701					
@@ -1227,7 +1227,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 6443	永續發展委員會			benson1.chen@tsecpv.com	6	(02)2912-2199 分機:8822					
 6446	永續發展中心	資深副理	李佳芳	csr-esg@pharmaessentia.com	5	+886-2-2655-7688 分機 1853		李	資深副理		
 6449	永續報告書編製小組		陳方如	abby_chen@apaq.com.tw	4	037-777588		陳	小姐		依 email 英文名「abby」判斷為小姐
-6451		股務	張玉蜂	esg@shunsintech.com	6	(02)2268-8368#3		張	股務		
+6451		股務	張玉蜂	esg@shunsintech.com	6	(02)2268-8368#3					
 6456	永續發展委員會ESG工作小組		陳小姐	esg@gis-touch.com	4	+886 37 777 939 ext.71821		陳	小姐		
 6461	ESG辦公室	發言人	皮先智	intech_esg@intechbiopharm.com	4	+886-2-7721-8877					
 6462		總務主管		frontdesk@egistec.com	10	+886-2-2658-9768 分機:611					
@@ -1328,7 +1328,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 6690	ESG辦公室			ir@acercsi.com	4	02-8979-6286					
 6691	永續發展委員會	秘書長		dereklin@yankey.com.tw	7	02-26001350#0212					
 6692	行政管理處		胡先生	yhu@acmepointes.com	5			胡	先生		
-6693	永續發展委員會（管理中心）			ir@inergy.com.tw	7						
+6693	永續發展委員會（管理中心）			ir@inergy.com.tw	7	03-552-5766					
 6695	永續發展工作推動小組			ir@icatchtek.com	4	886-3-5641600					
 6697	ESG永續發展推動小組			esg@itts.com.tw	4	02-2655-2525 ext:668					
 6698		永續長	黃信貿	esg@fine-mat.com	12	06-6016388		黃	永續長		
@@ -1411,7 +1411,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 6904		公司治理主管		sp@proxene.com.tw	6	+886-4-25627786					
 6906				ir@ghtinc.com	3						
 6910	永續發展工作小組		陳慧菁	esg@grandsys.com	8	02-6611-0777					
-6913	董事長室	特助	簡承威	ir@vso-corp.com	8	+886-2-3234-3038		簡	特助		
+6913	董事長室	特別助理	簡承威	ir@vso-corp.com	8	+886-2-3234-3038	原職稱：特助	簡	特別助理		
 6918	ESG推動小組（股務部）			admin@aplusbio.com	11	+886-2-2249-9222 分機 122					
 6919	行政管理部		簡伶伊	info@caliwaybiopharma.com	3	02-26971355					
 6921		公司治理主管	陳月卿	ir@leraintech.com	6	+886-2-82278678					
@@ -1609,7 +1609,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 8455				ir@daito-me.com; h_hama@daitome.co.jp	17	+886-2-2713-3220					
 8462		發言人	繆尚志	finance@pwind.com.tw	3	+886 7-348-8000	報告書另列聯絡人：吳幸樺 代理發言人				
 8463		協理	吳博翀	tm@mail.ruentex.com.tw	3	(02)8161-9989		吳	協理		
-8466	永續發展推動小組			ir@mjig.com	5						
+8466	永續發展推動小組			ir@mjig.com	5	+886-2-22684666					
 8467	總經理室永續小組			esg@bonnysports.com	5	(04)2537-6022					
 8472			陳先生	robin@gomaji.com	4	(02)2711-8177		陳	先生		
 8476		公司治理主管		yu.mao@tesc.com.tw	5	07-2229115					
@@ -1625,7 +1625,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 8908	管理部	經理	吳經理	management01@shng.com.tw	4	(07)7416101#133		吳	經理		
 8916				kl.888@klf-group.com	3	+886-2-2709-2550					
 8917	管理部	專員	曾逸凡	htgas@htgas.com.tw	4	02-8075-3600		曾	專員		
-8921	執行長室	特助	呂聖弘	siphon@shen.com.tw	7	(02)2270-8198 # 104		呂	特助		
+8921	執行長室	特別助理	呂聖弘	siphon@shen.com.tw	7	(02)2270-8198 # 104	原職稱：特助	呂	特別助理		
 8923	ESG永續發展委員會			simon@readingtimes.com.tw	6	(02)2306-6600					
 8924	公司治理小組			invest@o-ta.com.tw	4	(08) 778-3855					
 8926	永續發展部			csr@cogen.com.tw	3	02-8798-2000 Ext. 605					
@@ -1657,7 +1657,7 @@ code	dept	title	name	pdf_emails	page	phone	notes	sal_surname	sal_title	sal_unsur
 9928	財務部			bullock.yao@ctv.com.tw	5	02-27896641					
 9930	管理處			mservice@chc.com.tw	6	07-9736668					
 9931	治理主管室		蔡佳霖	tcl965@yahoo.com.tw	11	07-5315701#501					
-9934		編輯	黃曉惠	ir@globeunion.com	3			黃	編輯		
+9934		編輯	黃曉惠	ir@globeunion.com	3						
 9935	永續發展委員會	副總經理	張峻銘	ir@chingfeng.com	3	(04)780-1967		張	副總經理		
 9937	永續發展推動小組			ir@npcgas.com.tw	3	02-29356500 #242					
 9938	永續發展組			esg@paiho.com	4	+886-4-756-5307分機199					

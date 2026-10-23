@@ -17,6 +17,12 @@ def _norm(s):
     return s.translate(FW)
 
 
+def _squeeze_digits(text):
+    """PDF 文字裡數字中間被插入空格：「(02)2 202- 0152 分機：20 0 6」→「(02)2202-0152 分機：2006」"""
+    text = re.sub(r'(?<=\b\d) (?=\d)|(?<=\d) (?=\d\b)', '', text)
+    return re.sub(r'(?<=-) (?=\d)', '', text)
+
+
 def _anchor(lines, emails):
     flat = lambda s: re.sub(r'\s', '', s.replace('＠', '@')).lower()
     for i, l in enumerate(lines):
@@ -37,6 +43,11 @@ def _is_label(l):
 
 
 def find_phone(text, emails=(), names=()):
+    """先用原文找；找不到時才試「去掉數字間空格」的版本，避免把正常的「+886 2 xxxx」擠在一起。"""
+    return _find_phone(text, emails, names) or _find_phone(_squeeze_digits(text or ''), emails, names)
+
+
+def _find_phone(text, emails=(), names=()):
     """回傳聯絡段落中的電話，排除傳真與客服專線。
 
     有聯絡人姓名時，取緊接在姓名後面的電話；否則取有「電話」標示、離 email 最近的；
