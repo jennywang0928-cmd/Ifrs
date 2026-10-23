@@ -83,7 +83,7 @@ for code in sorted(set(companies) | set(reports)):
     pdf = emails(ct.get('pdf_emails'))
     # 寄送 email 以「報告書內文」為主，才會和 H~J 欄的聯絡人對得上；內文沒有才用申報資料
     if pdf:
-        send = [next((e for e in pdf if e in esg), pdf[0])]
+        send = pdf[:1] if ct.get('name') else [next((e for e in pdf if e in esg), pdf[0])]
         source = '報告書內文（與聯絡人對應）'
     elif esg:
         send, source = esg, '申報資料聯絡 email'
@@ -131,6 +131,22 @@ for cell in ws[1]:
     cell.font = Font(bold=True, color='FFFFFF')
     cell.fill = head_fill
     cell.alignment = Alignment(vertical='center', wrap_text=True)
+# Q、R 欄（永續報告書網址、公司網址）做成可點的超連結
+for col in (headers.index('永續報告書網址') + 1, headers.index('公司網址') + 1):
+    for i in range(2, len(rows) + 2):
+        cell = ws.cell(i, col)
+        # 修正公司申報時打錯的網址：中間空格、全形冒號、多打 h、少打冒號、瀏覽器外掛前綴
+        url = re.sub(r'\s+', '', cell.value or '').replace('：', ':')
+        url = re.sub(r'^chrome-extension://[^/]+/', '', url)
+        url = re.sub(r'^h+ttp', 'http', url, flags=re.I)
+        url = re.sub(r'^(https?)//', r'\1://', url, flags=re.I)
+        if not url or '.' not in url or not re.match(r'(https?:)?//|www\.|[\w-]+\.', url, re.I):
+            continue
+        cell.value = url
+        if not re.match(r'https?://', url, re.I):
+            url = 'https://' + url.lstrip('/')
+        cell.hyperlink = url
+        cell.style = 'Hyperlink'
 warn = PatternFill('solid', fgColor='FFF2CC')
 bad = PatternFill('solid', fgColor='F8CBAD')
 for i, row in enumerate(rows, start=2):
@@ -167,6 +183,7 @@ for line in [
     [],
     ['欄位說明'],
     ['建議寄送 email（對應聯絡人）', '優先用報告書內文聯絡 email（L 欄，和聯絡人同一段）；內文沒有才用申報資料（K 欄），都沒有改用公司信箱'],
+    ['永續報告書網址／公司網址', 'Q、R 欄可直接點擊開啟；公司申報時打錯的網址格式（空格、全形冒號等）已自動修正'],
     ['聯絡人電話（報告書）', '報告書聯絡段落的電話（含分機，已排除傳真）；報告書沒寫的改用申報資料聯絡資訊中的電話；都沒有就留空，可看 T 欄總機'],
     ['email 來源', '黃色＝改用公司信箱；橘色＝查無 email，需人工補'],
     ['聯絡人姓名', '報告書只寫「王先生／陳小姐」的照原文保留；多位聯絡人以頓號分隔，職稱以分號對應'],

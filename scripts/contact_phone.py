@@ -4,6 +4,7 @@ import re
 KEY = re.compile(r'聯絡|聯繫|連絡|意見|回饋|窗口|洽詢|聯系')
 TEL_LABEL = re.compile(r'電\s*話|專\s*線|TEL|Tel|tel|分\s*機|Phone|phone|聯絡方式')
 FAX = re.compile(r'傳\s*真|FAX|Fax|fax')
+SKIP = re.compile(r'客服|消費者|申訴|檢舉|0800')
 PHONE = re.compile(
     r'(?:\(\+?886[\s-]?0?\d{1,2}\)|\+?\s?886[\s-]?\(?0?\d{1,2}\)?|\+?\s?86[\s-]?\d{2,4}|\(0\d{1,2}\)|0\d{1,2}(?=[\s-]?\d{3,4}[\s-]?\d{3,4}))'
     r'[\s-]?\d{3,4}[\s-]?\d{3,4}'
@@ -30,8 +31,17 @@ def _anchor(lines, emails):
     return None
 
 
-def find_phone(text, emails=()):
-    """回傳聯絡段落中的電話；優先「電話/專線/TEL」那一行，跳過傳真。"""
+def _is_label(l):
+    """只有「電話：」「傳真」這類標示、沒有數字的短行。"""
+    return len(l) <= 12 and not re.search(r'\d', l) and bool(TEL_LABEL.search(l) or FAX.search(l))
+
+
+def find_phone(text, emails=(), names=()):
+    """回傳聯絡段落中的電話，排除傳真與客服專線。
+
+    有聯絡人姓名時，取緊接在姓名後面的電話；否則取有「電話」標示、離 email 最近的；
+    都沒有標示時依原文順序取第一個（表格多半電話在傳真前面）。
+    """
     lines = [_norm(l.strip()) for l in (text or '').split('\n') if l.strip()]
     a = _anchor(lines, [e.lower() for e in emails])
     if a is None:
@@ -40,17 +50,39 @@ def find_phone(text, emails=()):
     for i in range(a, max(-1, a - 12), -1):
         if KEY.search(lines[i]):
             start = i
-    # 依原文順序：沒標示「電話/傳真」的表格，通常電話寫在傳真前面
-    win = list(range(max(0, start - 1), min(len(lines), a + 8)))
-    labelled, plain = [], []
+    # 往上至少看 6 行：有些表格先列「地址、聯絡人、電話、傳真、email」的值，標題列在後面
+    win = list(range(max(0, min(start - 1, a - 6)), min(len(lines), a + 8)))
+    label_lines = [i for i in win if _is_label(lines[i])]
+    phone_lines = [i for i in win if PHONE.search(lines[i]) and not _is_label(lines[i])]
+    # 標示寫在號碼後面（例如「02-xxx / 電話： / 02-yyy / 傳真：」）
+    labels_after = bool(label_lines and phone_lines and phone_lines[0] < label_lines[0]
+                        and phone_lines[0] + 1 in label_lines)
+
+    cands = []  # (行號, 該行第幾個, 號碼, 是否有電話標示)
     for i in win:
         l = lines[i]
-        if FAX.search(l) and not TEL_LABEL.search(l.split('傳')[0].split('FAX')[0].split('Fax')[0]):
+        if _is_label(l) or SKIP.search(l):
             continue
+        near = lines[i + 1] if labels_after and i + 1 < len(lines) else (lines[i - 1] if i > 0 else '')
+        near = near if _is_label(near) else ''
         seg = re.split(r'傳\s*真|FAX|Fax|fax', l)[0]
-        for m in PHONE.finditer(seg):
+        if not seg.strip() or (not TEL_LABEL.search(seg) and FAX.search(near) and not TEL_LABEL.search(near)):
+            continue
+        for k, m in enumerate(PHONE.finditer(seg)):
             p = re.sub(r'\s+', ' ', m.group(0)).strip(' -')
-            if len(re.sub(r'\D', '', p)) < 8:
-                continue
-            (labelled if TEL_LABEL.search(seg) else plain).append(p)
-    return (labelled or plain or [''])[0]
+            if len(re.sub(r'\D', '', p)) >= 8:
+                cands.append((i, k, p, bool(TEL_LABEL.search(seg) or TEL_LABEL.search(near))))
+    if not cands:
+        return ''
+    flat = lambda x: re.sub(r'\s', '', x)
+    for n in names:
+        n = flat(n)
+        hit = next((i for i in win if len(n) >= 2 and n in flat(lines[i])), None)
+        if hit is not None:
+            after = [c for c in cands if hit <= c[0] <= hit + 4]
+            if after:
+                return min(after)[2]
+    labelled = [c for c in cands if c[3]]
+    if labelled:
+        return min(labelled, key=lambda c: (abs(c[0] - a), c[0], c[1]))[2]
+    return min(cands)[2]

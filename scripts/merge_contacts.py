@@ -43,7 +43,16 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                 found.append(e.lower())
         filed = re.findall(r'[a-z0-9._%+\-]+@[a-z0-9.\-]+',
                            re.sub(r'\s', '', (reports.get(code, {}).get('contactInfo') or '').replace('＠', '@')).lower())
-        phone = find_phone(full.get(code, ''), found or filed)
+        names = [n for n in re.split(r'[、,，/]', name) if n]
+        if len(found) > 1 and names:
+            # 有多個 email 時，把緊接在聯絡人姓名後面的那個排第一，F 欄寄送 email 才會和姓名對得上
+            lines = [re.sub(r'\s', '', l).replace('＠', '@').lower() for l in full.get(code, '').split('\n')]
+            hit = next((i for i, l in enumerate(lines) if any(len(n) >= 2 and re.sub(r'\s', '', n).lower() in l for n in names)), None)
+            if hit is not None:
+                near = next((e for l in lines[hit:hit + 5] for e in found if e in l), None)
+                if near:
+                    found = [near] + [e for e in found if e != near]
+        phone = find_phone(full.get(code, ''), found or filed, names)
         merged[code] = (dept, title, name, '; '.join(found), str(s.get('page', '')), phone)
 
 with open(OUT, 'w', encoding='utf-8') as f:
