@@ -5,6 +5,9 @@
 可另放 contacts_parsed.tsv（merge_contacts.py 產出的報告書聯絡人部門/職稱/姓名）
 """
 import json, os, re, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from contact_phone import PHONE, FW  # noqa: E402
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
@@ -61,8 +64,14 @@ if os.path.exists(f'{DATA}/contacts_parsed.tsv'):
     with open(f'{DATA}/contacts_parsed.tsv', encoding='utf-8') as f:
         next(f)
         for line in f:
-            code, dept, title, name, pdf_emails, page = line.rstrip('\n').split('\t')
-            contacts[code] = dict(dept=dept, title=title, name=name, pdf_emails=pdf_emails, page=page)
+            code, dept, title, name, pdf_emails, page, phone = line.rstrip('\n').split('\t')
+            contacts[code] = dict(dept=dept, title=title, name=name, pdf_emails=pdf_emails, page=page, phone=phone)
+
+
+def filed_phone(text):
+    """申報資料「聯絡資訊」欄若只留電話，取出來當備援。"""
+    m = PHONE.search((text or '').translate(FW))
+    return re.sub(r'\s+', ' ', m.group(0)).strip(' -') if m else ''
 
 rows = []
 for code in sorted(set(companies) | set(reports)):
@@ -72,10 +81,12 @@ for code in sorted(set(companies) | set(reports)):
     co = emails(c.get('co_email'))
     ct = contacts.get(code, {})
     pdf = emails(ct.get('pdf_emails'))
-    if esg:
-        send, source = esg, '永續報告書聯絡窗口'
-    elif pdf:
-        send, source = pdf[:1], '永續報告書內文聯絡 email'
+    # 寄送 email 以「報告書內文」為主，才會和 H~J 欄的聯絡人對得上；內文沒有才用申報資料
+    if pdf:
+        send = [next((e for e in pdf if e in esg), pdf[0])]
+        source = '報告書內文（與聯絡人對應）'
+    elif esg:
+        send, source = esg, '申報資料聯絡 email'
     elif co:
         send = co
         source = '公司信箱（報告書未填 email）' if r else '公司信箱（查無本年度永續報告書）'
@@ -100,13 +111,14 @@ for code in sorted(set(companies) | set(reports)):
         (r or {}).get('reportingInterval') or '',
         (r or {}).get('twDocLink') or '',
         (c.get('web') or '').strip().strip('　'),
+        ct.get('phone') or filed_phone((r or {}).get('contactInfo')),
         c.get('phone', ''),
     ])
 
-headers = ['公司代號', '公司簡稱', '公司名稱', '市場', '產業', '建議寄送 email', 'email 來源',
+headers = ['公司代號', '公司簡稱', '公司名稱', '市場', '產業', '建議寄送 email（對應聯絡人）', 'email 來源',
            '聯絡人部門', '聯絡人職稱', '聯絡人姓名',
            '永續報告書聯絡 email（申報資料）', '報告書內文聯絡 email', '公司信箱 (發言人/IR)', '永續報告書聯絡資訊原文', '聯絡資訊在報告書第幾頁', '報告期間',
-           '永續報告書網址', '公司網址', '總機電話']
+           '永續報告書網址', '公司網址', '聯絡人電話（報告書）', '公司總機電話']
 
 wb = Workbook()
 ws = wb.active
@@ -126,7 +138,7 @@ for i, row in enumerate(rows, start=2):
         ws.cell(i, 7).fill = warn
     elif row[6].startswith('查無'):
         ws.cell(i, 7).fill = bad
-widths = [9, 12, 30, 6, 14, 36, 26, 28, 24, 20, 36, 36, 30, 50, 12, 22, 40, 34, 16]
+widths = [9, 12, 30, 6, 14, 36, 26, 28, 24, 20, 36, 36, 30, 50, 12, 22, 40, 34, 28, 16]
 for i, w in enumerate(widths, start=1):
     ws.column_dimensions[get_column_letter(i)].width = w
 ws.freeze_panes = 'C2'
@@ -139,11 +151,12 @@ for line in [
     ['上市櫃公司永續報告書聯絡 email 名單'],
     [],
     ['公司總數', n],
-    ['永續報告書聯絡窗口 email', cnt('永續報告書聯絡窗口')],
-    ['永續報告書內文的聯絡 email（申報資料沒填）', cnt('永續報告書內文')],
+    ['寄送 email 用報告書內文（與聯絡人對應）', cnt('報告書內文')],
+    ['寄送 email 用申報資料（報告書內文沒寫 email）', cnt('申報資料')],
     ['有聯絡人部門', sum(1 for r in rows if r[7])],
     ['有聯絡人職稱', sum(1 for r in rows if r[8])],
     ['有聯絡人姓名', sum(1 for r in rows if r[9])],
+    ['有聯絡人電話', sum(1 for r in rows if r[18])],
     ['改用公司信箱（報告書未填 email 或未申報）', cnt('公司信箱')],
     ['查無 email，需人工補', cnt('查無')],
     [],
@@ -153,7 +166,8 @@ for line in [
     ['聯絡人部門／職稱／姓名', '永續報告書 PDF 內「聯絡資訊／意見回饋」段落，逐份判讀；報告書沒寫的就留空'],
     [],
     ['欄位說明'],
-    ['建議寄送 email', '優先用永續報告書上的聯絡 email；沒有的話改用公司信箱'],
+    ['建議寄送 email（對應聯絡人）', '優先用報告書內文聯絡 email（L 欄，和聯絡人同一段）；內文沒有才用申報資料（K 欄），都沒有改用公司信箱'],
+    ['聯絡人電話（報告書）', '報告書聯絡段落的電話（含分機，已排除傳真）；報告書沒寫的改用申報資料聯絡資訊中的電話；都沒有就留空，可看 T 欄總機'],
     ['email 來源', '黃色＝改用公司信箱；橘色＝查無 email，需人工補'],
     ['聯絡人姓名', '報告書只寫「王先生／陳小姐」的照原文保留；多位聯絡人以頓號分隔，職稱以分號對應'],
     ['報告書內文聯絡 email', '報告書 PDF 聯絡資訊段落裡寫的 email；少數公司申報資料填的 email 和報告書內文不同，部門/職稱/姓名是依報告書內文'],
@@ -170,4 +184,4 @@ info.column_dimensions['A'].width = 40
 info.column_dimensions['B'].width = 90
 
 wb.save(OUT)
-print('rows', n, 'esg', cnt('永續報告書'), 'company', cnt('公司信箱'), 'none', cnt('查無'))
+print('rows', n, 'pdf', cnt('報告書內文'), 'filed', cnt('申報資料'), 'company', cnt('公司信箱'), 'none', cnt('查無'))
