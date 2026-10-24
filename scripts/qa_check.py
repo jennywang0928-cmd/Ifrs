@@ -71,6 +71,12 @@ for i, r in enumerate(data, start=2):
             add('網址', code, f'{name_}沒有超連結且未標示：{c.value}')
         if c.hyperlink and ' ' in c.hyperlink.target:
             add('網址', code, f'超連結含空白：{c.hyperlink.target}')
+    lcell = ws.cell(i, col['稱呼職稱'] + 1)
+    note = lcell.comment.text if lcell.comment else ''
+    if '沒把握' in note and (lcell.fill.fgColor.rgb in (None, '00000000') or '依名字推測' not in g('需確認事項')):
+        add('稱呼', code, '依名字推測沒把握，但 L 欄沒有黃底或 W 欄沒有標示')
+    if name and not sur and not st and not re.match(r'[A-Za-z]', name) and not TITLE_WORDS.search(name):
+        add('稱呼', code, f'有中文姓名但沒有稱呼：{name}')
     w = g('需確認事項')
     if w and ws.cell(i, col['需確認事項'] + 1).fill.fgColor.rgb in (None, '00000000'):
         add('標示', code, f'W 欄有內容但沒有上色：{w}')

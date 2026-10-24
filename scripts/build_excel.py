@@ -65,11 +65,12 @@ if os.path.exists(f'{DATA}/contacts_parsed.tsv'):
     with open(f'{DATA}/contacts_parsed.tsv', encoding='utf-8') as f:
         next(f)
         for line in f:
-            code, dept, title, name, pdf_emails, page, phone, notes, sal_sur, sal_title, sal_unsure, sal_note = \
+            code, dept, title, name, pdf_emails, page, phone, notes, sal_sur, sal_title, sal_unsure, sal_note, \
+                gender_unsure = \
                 line.rstrip('\n').split('\t')
             contacts[code] = dict(dept=dept, title=title, name=name, pdf_emails=pdf_emails, page=page, phone=phone,
                                   notes=notes, sal_sur=sal_sur, sal_title=sal_title, sal_unsure=sal_unsure,
-                                  sal_note=sal_note)
+                                  sal_note=sal_note, gender_unsure=gender_unsure)
 
 
 def filed_phone(text):
@@ -105,6 +106,8 @@ for code in sorted(set(companies) | set(reports)):
     if len(pdf) > 1 and not ct.get('name'):
         # 有聯絡人姓名時，F 欄已取緊接在姓名後的 email，不必再確認
         check.append('🟡 報告書列多個 email，請確認 F 欄')
+    if ct.get('gender_unsure'):
+        check.append('🟡 先生／小姐依名字推測，請確認')
     if ct.get('sal_unsure'):
         check.append('🟡 四字姓名，請確認稱呼姓')
     rows.append([
@@ -179,7 +182,10 @@ for i, row in enumerate(rows, start=2):
 # 被移除的聯絡人、職稱用註解標在 I、J 欄
 for i, (note, sal_note) in enumerate(notes_by_row, start=2):
     if sal_note:
-        ws.cell(i, headers.index('稱呼職稱') + 1).comment = Comment(sal_note, '整理說明', width=240, height=50)
+        lc = ws.cell(i, headers.index('稱呼職稱') + 1)
+        lc.comment = Comment(sal_note, '整理說明', width=240, height=50)
+        if '沒把握' in sal_note:
+            lc.fill = PatternFill('solid', fgColor='FFF2CC')
     for part in filter(None, note.split(' / ')):
         col = 10 if part.startswith('報告書另列聯絡人') else 9
         cell = ws.cell(i, col)
@@ -227,7 +233,7 @@ for line in [
     ['email 來源', '黃色＝改用公司信箱；橘色＝查無 email，需人工補'],
     ['聯絡人（H～J 欄）', '報告書列多位聯絡人時只留職級最高者；一人多個職稱只留最高的（例：發言人暨總經理 → 總經理）。被移除的寫在 I、J 欄的註解（儲存格右上角紅色三角形）'],
     ['職級順序', '董事長 > 總經理/執行長 > 副總經理/財務長/永續長 > 協理/總監/處長 > 經理/副理 > 課長/主任/組長 > 專員/秘書/特助 > 發言人/公司治理主管/執行秘書等角色'],
-    ['稱呼姓／稱呼職稱（K、L 欄）', '信件開頭用「K+L」，例：王經理、劉小姐、廖執行秘書；英文名只填名字（信件用「Wendy 您好」）；兩欄都空白時信件用「您好」。只有姓名沒有職稱的，報告書原文寫明或 email 英文名可判斷時才填「先生／小姐」（依 email 判斷的在 L 欄有註解），其餘維持「您好」'],
+    ['稱呼姓／稱呼職稱（K、L 欄）', '信件開頭用「K+L」，例：王經理、劉小姐、廖執行秘書；英文名只填名字（信件用「Wendy 您好」）；兩欄都空白時信件用「您好」。只有姓名沒有職稱的，依序用報告書原文、email 英文名、中文名字判斷「先生／小姐」（L 欄註解寫明依據；依名字沒把握的 L 欄黃底、W 欄標示，請確認）'],
     ['需確認事項（W 欄）', '🔴 必須處理（紅底）、🟡 建議確認（黃底）；空白代表不需處理'],
     ['報告書內文聯絡 email', '報告書 PDF 聯絡資訊段落裡寫的 email；少數公司申報資料填的 email 和報告書內文不同，部門/職稱/姓名是依報告書內文'],
     ['永續報告書聯絡資訊原文', '公司申報時填寫的原文，有些只留電話或網址，可參考後人工補 email'],

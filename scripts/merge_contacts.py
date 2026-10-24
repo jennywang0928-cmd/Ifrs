@@ -3,7 +3,7 @@
 用法: python3 merge_contacts.py <parse 資料夾> <snips.jsonl> <snips_deep.jsonl> <輸出.tsv> <reports.json> <contacts.jsonl> <contacts_deep.jsonl>
 parse 資料夾內：manual_*.tsv（第一輪判讀）、deep_*.tsv（第二輪判讀），格式為 代號\t部門\t職稱\t姓名
 """
-import glob, json, re, sys
+import glob, json, os, re, sys
 from contact_phone import find_phone
 from contact_rank import pick, salutation, surname
 from contact_gender import from_report, from_email, conflicts
@@ -54,6 +54,12 @@ def rows(pattern):
 
 
 snips, snips_deep = load_snips(SN), load_snips(SND)
+# 依中文名字判斷的先生／小姐（逐一人工判讀；sure=0 代表沒把握，Excel 標黃底請使用者確認）
+by_name = {}
+if os.path.exists(f'{P}/gender_by_name.tsv'):
+    for line in open(f'{P}/gender_by_name.tsv', encoding='utf-8'):
+        code_, name_, g_, sure_ = line.rstrip('\n').split('\t')
+        by_name[(code_, name_)] = (g_, sure_ == '1')
 reports = {r['code']: r for v in json.load(open(REPORTS, encoding='utf-8')).values() for r in v['data']}
 pages = {}
 for path in (CT, CTD):
@@ -85,7 +91,7 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                     found = [near] + [e for e in found if e != near]
         phone = find_phone(full.get(code, ''), found or filed, names)
         sur, stitle, unsure = salutation(title, name)
-        gender_note = ''
+        gender_note, gender_unsure = '', ''
         if not sur and name and not re.match(r'[A-Za-z]', name):
             # 只有姓名、沒有可用職稱：報告書原文寫明先生/小姐，或 email 英文名可判斷時才填，否則信件用「您好」
             g = from_report(full.get(code, ''), name)
@@ -96,14 +102,18 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                     g = ''
                 if g:
                     gender_note = f'依 email 英文名「{en}」判斷為{g}'
+            if not g and (code, name) in by_name:
+                g, sure = by_name[(code, name)]
+                gender_note = f'依中文名字判斷為{g}' + ('' if sure else '（沒把握，請確認）')
+                gender_unsure = '' if sure else '1'
             if g:
                 sur, unsure = surname(name)
                 stitle = g
         merged[code] = (dept, title, name, '; '.join(found), str(s.get('page', '')), phone,
-                        ' / '.join(notes), sur, stitle, '1' if unsure else '', gender_note)
+                        ' / '.join(notes), sur, stitle, '1' if unsure else '', gender_note, gender_unsure)
 
 with open(OUT, 'w', encoding='utf-8') as f:
-    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\tsal_note\n')
+    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\tsal_note\tgender_unsure\n')
     for code in sorted(merged):
         f.write(code + '\t' + '\t'.join(merged[code]) + '\n')
 print('contacts', len(merged), 'with name', sum(1 for v in merged.values() if v[2]),
