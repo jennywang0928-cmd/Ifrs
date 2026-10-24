@@ -42,5 +42,11 @@ ESG InfoHub 會擋過多連線，平行數不要超過 10。
   沒有人名才 K、L 空白（信件用「您好」）。
 - **U 欄**：報告書上聯絡人的電話（含分機、排除傳真與客服專線），V 欄才是總機。
 - **S、T 欄**：超連結。
-- **W 欄需確認事項**：🔴 必須處理（紅底）、🟡 建議確認（黃底）。
+- **W 欄需確認事項**：🔴 必須處理（紅底）、🟡 建議確認（黃底）。程式判斷不了的疑慮寫在 `data/manual_flags.tsv`；W 欄有內容的公司會集中列在 Excel 的「需確認清單」分頁，並寫明要確認什麼。
 - 使用者公司無法上傳可編輯檔案到 Claude，只能貼文字或上傳 PDF。
+
+## 檔案位置
+
+- `data/`：公司基本資料、申報資料、擷取的報告書文字、合併結果（`contacts_parsed.tsv`）、`manual_flags.tsv`。
+- `parse/`：逐家人工判讀的結果（`manual_*.tsv`、`deep_*.tsv`、`gender_by_name.tsv`）與裁出的聯絡段落。
+- 不連網也能重現：`merge_contacts.py` → `build_excel.py` → `qa_check.py`，結果應與 `output/` 的 Excel 相同。

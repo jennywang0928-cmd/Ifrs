@@ -74,6 +74,16 @@ if os.path.exists(f'{DATA}/contacts_parsed.tsv'):
                                   sal_note=sal_note, gender_unsure=gender_unsure, send_email=send_email)
 
 
+# 人工補充的確認事項（code\t🔴或🟡\t簡短標題\t詳細說明），非程式能自動判斷的疑慮寫在這裡
+manual_flags = {}
+_mf = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'manual_flags.tsv')
+if os.path.exists(_mf):
+    for line in open(_mf, encoding='utf-8'):
+        if line.strip():
+            code_, lv_, short_, msg_ = line.rstrip('\n').split('\t')
+            manual_flags[code_] = (lv_, short_, msg_)
+
+
 def filed_phone(text):
     """申報資料「聯絡資訊」欄若只留電話，取出來當備援。"""
     m = PHONE.search((text or '').translate(FW))
@@ -114,6 +124,8 @@ for code in sorted(set(companies) | set(reports)):
         check.append('🟡 先生／小姐依名字推測，請確認')
     if ct.get('sal_unsure'):
         check.append('🟡 四字姓名，請確認稱呼姓')
+    if code in manual_flags:
+        check.append(f'{manual_flags[code][0]} {manual_flags[code][1]}')
     rows.append([
         code,
         c.get('short') or (r or {}).get('shortName', ''),
@@ -208,6 +220,63 @@ for i, w in enumerate(widths, start=1):
     ws.column_dimensions[get_column_letter(i)].width = w
 ws.freeze_panes = 'C2'
 ws.auto_filter.ref = ws.dimensions
+
+# 「需確認清單」分頁：把 W 欄有內容的公司集中列出，並寫明要確認什麼
+def todo_detail(row, flag, note):
+    code = row[0]
+    send, source, name, title, sal_sur, sal_title = row[5], row[6], row[9], row[8], row[10], row[11]
+    if flag.startswith('🔴 查無 email'):
+        return '報告書、申報資料、公司基本資料都沒有 email，請到公司網站或報告書自行查詢後補上'
+    if flag.startswith('🔴 永續報告書網址無效'):
+        return f'申報的報告書網址打不開（{row[18]}），請到 ESG InfoHub 或公司網站找報告書；不影響寄信'
+    if flag.startswith('🟡 改用公司總信箱'):
+        why = '該公司今年度沒有申報永續報告書' if '查無本年度' in source else '報告書沒有寫 email'
+        return f'{why}，目前寄到公司基本資料的信箱（{send}），可能是發言人或 IR，不一定是 ESG 窗口。建議查公司網站是否有永續／ESG 窗口'
+    if flag.startswith('🟡 報告書列多個'):
+        return f'報告書列了多個 email（{row[13]}），已先選 {send}，請確認要寄哪一個'
+    if flag.startswith('🟡 先生／小姐'):
+        return f'{name} 的性別是依中文名字推測，目前稱呼「{sal_sur}{sal_title}」（{note or "沒把握"}）。請確認先生還是小姐，不對的話改 K、L 欄'
+    if flag.startswith('🟡 四字姓名'):
+        return f'{name} 是四字姓名，稱呼姓目前填「{sal_sur}」，請確認姓怎麼切（複姓、冠夫姓、日本名）'
+    if code in manual_flags:
+        return manual_flags[code][2]
+    return ''
+
+
+todo = wb.create_sheet('需確認清單', 1)
+todo.append(['等級', '公司代號', '公司簡稱', '需確認事項', '要確認什麼', '目前建議寄送 email', '聯絡人（部門／職稱／姓名）', '稱呼', '永續報告書網址', '寄送名單第幾列'])
+todo_rows = []
+for i, row in enumerate(rows, start=2):
+    w = ws.cell(i, wcol).value
+    if not w:
+        continue
+    sal_note = notes_by_row[i - 2][1]
+    for flag in w.split('；'):
+        todo_rows.append(('🔴' if '🔴' in flag else '🟡', row[0], row[1], flag.split(' ', 1)[1] if ' ' in flag else flag,
+                          todo_detail(row, flag, sal_note), row[5], ' / '.join(x for x in (row[7], row[8], row[9]) if x),
+                          (row[10] + row[11]) if row[10] else '', row[18], i))
+todo_rows.sort(key=lambda t: (t[0] != '🔴', t[3], t[1]))
+for t in todo_rows:
+    todo.append(list(t))
+for cell in todo[1]:
+    cell.font = Font(bold=True, color='FFFFFF')
+    cell.fill = head_fill
+    cell.alignment = Alignment(vertical='center', wrap_text=True)
+for r in range(2, len(todo_rows) + 2):
+    todo.cell(r, 1).fill = bad if todo.cell(r, 1).value == '🔴' else warn
+    todo.cell(r, 5).alignment = Alignment(wrap_text=True, vertical='top')
+    url = todo.cell(r, 9).value
+    if url and re.match(r'https?://', url):
+        todo.cell(r, 9).hyperlink = url
+        todo.cell(r, 9).style = 'Hyperlink'
+    ref = todo.cell(r, 10)
+    ref.hyperlink = f"#'寄送名單'!A{ref.value}"
+    ref.value = f'第 {ref.value} 列'
+    ref.style = 'Hyperlink'
+for i, w_ in enumerate([6, 9, 12, 34, 70, 34, 36, 12, 40, 12], start=1):
+    todo.column_dimensions[get_column_letter(i)].width = w_
+todo.freeze_panes = 'D2'
+todo.auto_filter.ref = todo.dimensions
 
 n = len(rows)
 cnt = lambda p: sum(1 for r in rows if r[6].startswith(p))
