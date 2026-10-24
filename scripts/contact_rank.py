@@ -53,8 +53,8 @@ def split_people(dept, title, name):
     return list(zip(dgroups, tgroups, names))
 
 
-def pick(dept, title, name):
-    """回傳挑出的 (部門, 職稱, 姓名, 被移除的說明)。"""
+def pick(dept, title, name, prefer=None):
+    """回傳挑出的 (部門, 職稱, 姓名, 被移除的說明)。prefer：指定要留下第幾位（依 email 比對出的本人）。"""
     people = split_people(dept, title, name)
     scored = []
     for i, (d, t, n) in enumerate(people):
@@ -64,7 +64,7 @@ def pick(dept, title, name):
             r2, _ = rank_of(n)
             r = min(r, r2)
         scored.append((r, i, d, t, bt, n))
-    r, i, d, t, bt, n = min(scored)
+    r, i, d, t, bt, n = scored[prefer] if prefer is not None else min(scored)
     bt = _full_title(bt)
     notes = []
     if len(people) > 1:

@@ -5,8 +5,10 @@ parse 資料夾內：manual_*.tsv（第一輪判讀）、deep_*.tsv（第二輪�
 """
 import glob, json, os, re, sys
 from contact_phone import find_phone
-from contact_rank import pick, salutation, surname
-from contact_gender import from_report, from_email, conflicts
+from contact_rank import pick, salutation, surname, split_people, SALUTE
+from contact_gender import from_report, from_email, conflicts, surname_variants, MALE, FEMALE
+
+FIRST_NAMES = MALE | FEMALE | {'davis', 'vivi', 'gigi', 'coco', 'kiki', 'lulu', 'mimi', 'nana'}
 
 P, SN, SND, OUT, REPORTS, CT, CTD = sys.argv[1:8]
 EMAIL = re.compile(r'[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}')
@@ -37,6 +39,45 @@ def fix_emails(text):
                 break
         out.append(e)
     return out
+
+
+GENERIC = re.compile(r'esg|csr|public|service|info|contact|^ir$|^ir[-_.]|stock|sustain|spokes|finance|affairs|admin|^hr$|sales|invest|^pr$|news|webmaster|office|support|official|feedback|suggest')
+
+
+def email_owner(email, people):
+    """email 帳號裡的姓氏拼音對得上哪一位聯絡人（例：candy.chiu → 邱秀香）；對不上或對上多位回傳 None。"""
+    local, _, domain = (email or '').lower().partition('@')
+    # 和公司網域重複的字（namliong_public@namliong-global.com 的 namliong）是公司名，不是姓
+    toks = [t for t in re.split(r'[._\-\d]+', local) if t and t not in domain]
+    hits = set()
+    for j, (_, _, n) in enumerate(people):
+        n = n.strip()
+        if not n:
+            continue
+        if re.match(r'[A-Za-z]', n):
+            variants = {n.split()[-1].lower()} if len(n.split()) > 1 else set()
+        else:
+            m = SALUTE.match(n)
+            sur = m.group(1) if m else surname(n)[0]
+            variants = surname_variants(sur[:2] if len(sur) > 1 else sur)
+        for t in toks:
+            # 「angelaho」「davishan」：前半段必須是英文名字才算，避免巧合
+            if t in variants or any(t.endswith(v) and t[:-len(v)] in FIRST_NAMES for v in variants if len(v) >= 2):
+                hits.add(j)
+    return hits.pop() if len(hits) == 1 else None
+
+
+def reorder_by_name(found, name, full_text):
+    """有多個 email 時，把緊接在聯絡人姓名後面的那個排第一，F 欄寄送 email 才會和姓名對得上。"""
+    names = [n for n in re.split(r'[、,，/]', name) if n]
+    if len(found) > 1 and names:
+        lines = [re.sub(r'\s', '', l).replace('＠', '@').lower() for l in full_text.split('\n')]
+        hit = next((i for i, l in enumerate(lines) if any(len(n) >= 2 and re.sub(r'\s', '', n).lower() in l for n in names)), None)
+        if hit is not None:
+            near = next((e for l in lines[hit:hit + 5] for e in found if e in l), None)
+            if near:
+                found = [near] + [e for e in found if e != near]
+    return found
 
 
 def load_snips(path):
@@ -80,15 +121,31 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                 found.append(e.lower())
         filed = re.findall(r'[a-z0-9._%+\-]+@[a-z0-9.\-]+',
                            re.sub(r'\s', '', (reports.get(code, {}).get('contactInfo') or '').replace('＠', '@')).lower())
+        found = reorder_by_name(found, name, full.get(code, ''))
+        send = ''
+        people = split_people(dept0, title0, name0)
+        if len(people) > 1:
+            # 多位聯絡人時，email 對得上的人優先（依姓氏拼音比對）；都對不上才留職級最高的
+            first = (found or filed or [''])[0]
+            idx = email_owner(first, people)
+            if idx is None and GENERIC.search(first.split('@')[0]):
+                # 寄的是公用信箱：申報資料或內文若有某位聯絡人的個人信箱，改寄給那位
+                for e in filed + found:
+                    j = email_owner(e, people)
+                    if j is not None:
+                        idx, send = j, e
+                        break
+            cur = next((j for j, p in enumerate(people) if p[2].strip() == name), None)
+            if idx is not None and idx != cur:
+                dept, title, name, notes = pick(dept0, title0, name0, prefer=idx)
+                notes.insert(0, f'依 email（{send or first}）姓氏比對，改留此聯絡人')
+                found = reorder_by_name(found, name, full.get(code, ''))
+                if send in found:
+                    found = [send] + [e for e in found if e != send]
+                    send = ''
+            else:
+                send = ''
         names = [n for n in re.split(r'[、,，/]', name) if n]
-        if len(found) > 1 and names:
-            # 有多個 email 時，把緊接在聯絡人姓名後面的那個排第一，F 欄寄送 email 才會和姓名對得上
-            lines = [re.sub(r'\s', '', l).replace('＠', '@').lower() for l in full.get(code, '').split('\n')]
-            hit = next((i for i, l in enumerate(lines) if any(len(n) >= 2 and re.sub(r'\s', '', n).lower() in l for n in names)), None)
-            if hit is not None:
-                near = next((e for l in lines[hit:hit + 5] for e in found if e in l), None)
-                if near:
-                    found = [near] + [e for e in found if e != near]
         phone = find_phone(full.get(code, ''), found or filed, names)
         sur, stitle, unsure = salutation(title, name)
         gender_note, gender_unsure = '', ''
@@ -97,7 +154,7 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
             g = from_report(full.get(code, ''), name)
             if not g:
                 s0, _ = surname(name)
-                g, en = from_email((found or filed or [''])[0], s0)
+                g, en = from_email(send or (found or filed or [''])[0], s0)
                 if g and conflicts(name, g):
                     g = ''
                 if g:
@@ -110,10 +167,10 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                 sur, unsure = surname(name)
                 stitle = g
         merged[code] = (dept, title, name, '; '.join(found), str(s.get('page', '')), phone,
-                        ' / '.join(notes), sur, stitle, '1' if unsure else '', gender_note, gender_unsure)
+                        ' / '.join(notes), sur, stitle, '1' if unsure else '', gender_note, gender_unsure, send)
 
 with open(OUT, 'w', encoding='utf-8') as f:
-    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\tsal_note\tgender_unsure\n')
+    f.write('code\tdept\ttitle\tname\tpdf_emails\tpage\tphone\tnotes\tsal_surname\tsal_title\tsal_unsure\tsal_note\tgender_unsure\tsend_email\n')
     for code in sorted(merged):
         f.write(code + '\t' + '\t'.join(merged[code]) + '\n')
 print('contacts', len(merged), 'with name', sum(1 for v in merged.values() if v[2]),

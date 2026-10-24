@@ -66,11 +66,11 @@ if os.path.exists(f'{DATA}/contacts_parsed.tsv'):
         next(f)
         for line in f:
             code, dept, title, name, pdf_emails, page, phone, notes, sal_sur, sal_title, sal_unsure, sal_note, \
-                gender_unsure = \
+                gender_unsure, send_email = \
                 line.rstrip('\n').split('\t')
             contacts[code] = dict(dept=dept, title=title, name=name, pdf_emails=pdf_emails, page=page, phone=phone,
                                   notes=notes, sal_sur=sal_sur, sal_title=sal_title, sal_unsure=sal_unsure,
-                                  sal_note=sal_note, gender_unsure=gender_unsure)
+                                  sal_note=sal_note, gender_unsure=gender_unsure, send_email=send_email)
 
 
 def filed_phone(text):
@@ -87,7 +87,10 @@ for code in sorted(set(companies) | set(reports)):
     ct = contacts.get(code, {})
     pdf = emails(ct.get('pdf_emails'))
     # 寄送 email 以「報告書內文」為主，才會和 H~J 欄的聯絡人對得上；內文沒有才用申報資料
-    if pdf:
+    if ct.get('send_email'):
+        # 依 email 姓氏比對改選聯絡人時，用申報資料裡那位聯絡人的個人信箱
+        send, source = [ct['send_email']], '申報資料聯絡 email（與聯絡人對應）'
+    elif pdf:
         send = pdf[:1] if ct.get('name') else [next((e for e in pdf if e in esg), pdf[0])]
         source = '報告書內文（與聯絡人對應）'
     elif esg:
@@ -187,7 +190,7 @@ for i, (note, sal_note) in enumerate(notes_by_row, start=2):
         if '沒把握' in sal_note:
             lc.fill = PatternFill('solid', fgColor='FFF2CC')
     for part in filter(None, note.split(' / ')):
-        col = 10 if part.startswith('報告書另列聯絡人') else 9
+        col = 9 if part.startswith('原職稱') else 10
         cell = ws.cell(i, col)
         text = (cell.comment.text + '\n' if cell.comment else '') + part
         cell.comment = Comment(text, '整理說明', width=320, height=90)
