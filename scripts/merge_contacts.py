@@ -5,6 +5,7 @@ parse 資料夾內：manual_*.tsv（第一輪判讀）、deep_*.tsv（第二輪�
 """
 import glob, json, os, re, sys
 from contact_phone import find_phone
+from email_fix import trim_tld
 from contact_rank import pick, salutation, surname, split_people, SALUTE
 from contact_gender import from_report, from_email, conflicts, surname_variants, MALE, FEMALE
 
@@ -37,7 +38,7 @@ def fix_emails(text):
                     and re.search(r'\.' + TLD + r'$', q.lower()):
                 e = q
                 break
-        out.append(e)
+        out.append(trim_tld(e))
     return out
 
 
@@ -62,7 +63,9 @@ def email_owner(email, people):
             variants = surname_variants(sur[:2] if len(sur) > 1 else sur)
         for t in toks:
             # 「angelaho」「davishan」：前半段必須是英文名字才算，避免巧合
-            if t in variants or any(t.endswith(v) and t[:-len(v)] in FIRST_NAMES for v in variants if len(v) >= 2):
+            # 「shpan」：前面兩個字母是名字縮寫（信宏）也算；姓的拼音至少 3 個字母，避免 hsu（許）誤對到 su（蘇）
+            if t in variants or any(t.endswith(v) and t[:-len(v)] in FIRST_NAMES for v in variants if len(v) >= 2) \
+                    or any(t.endswith(v) and len(t) - len(v) == 2 for v in variants if len(v) >= 3):
                 hits.add(j)
     return hits.pop() if len(hits) == 1 else None
 
@@ -121,11 +124,13 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                 found.append(e.lower())
         filed = re.findall(r'[a-z0-9._%+\-]+@[a-z0-9.\-]+',
                            re.sub(r'\s', '', (reports.get(code, {}).get('contactInfo') or '').replace('＠', '@')).lower())
+        filed = [trim_tld(e) for e in filed]
         found = reorder_by_name(found, name, full.get(code, ''))
         send = ''
         people = split_people(dept0, title0, name0)
-        if len(people) > 1:
+        if any(p[2].strip() for p in people):
             # 多位聯絡人時，email 對得上的人優先（依姓氏拼音比對）；都對不上才留職級最高的
+            # 寄的是公用信箱而申報資料／內文有聯絡人本人的個人信箱時（只有一位聯絡人也一樣），改寄個人信箱
             first = (found or filed or [''])[0]
             idx = email_owner(first, people)
             if idx is None and GENERIC.search(first.split('@')[0]):
@@ -140,6 +145,11 @@ for src, full, data in ((snips_deep, pages[CTD], rows('deep_*.tsv')), (snips, pa
                 dept, title, name, notes = pick(dept0, title0, name0, prefer=idx)
                 notes.insert(0, f'依 email（{send or first}）姓氏比對，改留此聯絡人')
                 found = reorder_by_name(found, name, full.get(code, ''))
+                if send in found:
+                    found = [send] + [e for e in found if e != send]
+                    send = ''
+            elif idx is not None and send:
+                notes.insert(0, f'報告書只列公用信箱（{first}），改寄申報資料上聯絡人本人的信箱')
                 if send in found:
                     found = [send] + [e for e in found if e != send]
                     send = ''

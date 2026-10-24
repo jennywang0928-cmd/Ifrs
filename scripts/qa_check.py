@@ -1,5 +1,7 @@
 """交檔前自我檢查：python3 qa_check.py <excel>。列出所有可疑之處，沒有問題時印出 OK。"""
-import re, sys
+import os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from email_fix import bad_tld  # noqa: E402
 from collections import Counter
 from openpyxl import load_workbook
 
@@ -35,6 +37,8 @@ for i, r in enumerate(data, start=2):
     for e in filter(None, f.split('; ')):
         if not EMAIL.match(e):
             add('email', code, f'F 欄 email 格式錯誤：{e}')
+        if bad_tld(e):
+            add('email', code, f'F 欄 email 結尾可疑（可能黏到後面的字）：{e}')
         if e[:1] in '._-':
             add('email', code, f'F 欄 email 帳號開頭不完整（可能被截斷）：{e}')
     if not f and '查無 email' not in g('需確認事項'):

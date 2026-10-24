@@ -8,6 +8,7 @@ import json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from contact_phone import PHONE, FW  # noqa: E402
+from email_fix import trim_tld  # noqa: E402
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.comments import Comment
@@ -34,7 +35,7 @@ def emails(text):
                  if e[:1] in '._-' else e for e in found]
     out = []
     for e in found:
-        e = e.strip('.').lower()
+        e = trim_tld(e.strip('.')).lower()
         if e not in out:
             out.append(e)
     return out
