@@ -215,13 +215,13 @@ for i in range(2, len(rows) + 2):
         ws.cell(i, wcol).fill = bad
     elif '🟡' in v:
         ws.cell(i, wcol).fill = warn
-widths = [9, 12, 30, 6, 14, 36, 26, 28, 24, 20, 10, 14, 36, 36, 30, 50, 12, 22, 40, 34, 28, 16, 44]
+widths = [9, 12, 30, 6, 14, 36, 26, 28, 24, 20, 10, 14, 36, 36, 30, 50, 12, 22, 40, 34, 28, 16, 70]
 for i, w in enumerate(widths, start=1):
     ws.column_dimensions[get_column_letter(i)].width = w
 ws.freeze_panes = 'C2'
 ws.auto_filter.ref = ws.dimensions
 
-# 「需確認清單」分頁：把 W 欄有內容的公司集中列出，並寫明要確認什麼
+# 每個確認事項要寫明「要確認什麼」
 def todo_detail(row, flag, note):
     code = row[0]
     send, source, name, title, sal_sur, sal_title = row[5], row[6], row[9], row[8], row[10], row[11]
@@ -243,40 +243,17 @@ def todo_detail(row, flag, note):
     return ''
 
 
-todo = wb.create_sheet('需確認清單', 1)
-todo.append(['等級', '公司代號', '公司簡稱', '需確認事項', '要確認什麼', '目前建議寄送 email', '聯絡人（部門／職稱／姓名）', '稱呼', '永續報告書網址', '寄送名單第幾列'])
-todo_rows = []
+# W 欄：每個確認事項後面直接寫明要確認什麼
 for i, row in enumerate(rows, start=2):
-    w = ws.cell(i, wcol).value
-    if not w:
+    w = ws.cell(i, wcol)
+    if not w.value:
         continue
-    sal_note = notes_by_row[i - 2][1]
-    for flag in w.split('；'):
-        todo_rows.append(('🔴' if '🔴' in flag else '🟡', row[0], row[1], flag.split(' ', 1)[1] if ' ' in flag else flag,
-                          todo_detail(row, flag, sal_note), row[5], ' / '.join(x for x in (row[7], row[8], row[9]) if x),
-                          (row[10] + row[11]) if row[10] else '', row[18], i))
-todo_rows.sort(key=lambda t: (t[0] != '🔴', t[3], t[1]))
-for t in todo_rows:
-    todo.append(list(t))
-for cell in todo[1]:
-    cell.font = Font(bold=True, color='FFFFFF')
-    cell.fill = head_fill
-    cell.alignment = Alignment(vertical='center', wrap_text=True)
-for r in range(2, len(todo_rows) + 2):
-    todo.cell(r, 1).fill = bad if todo.cell(r, 1).value == '🔴' else warn
-    todo.cell(r, 5).alignment = Alignment(wrap_text=True, vertical='top')
-    url = todo.cell(r, 9).value
-    if url and re.match(r'https?://', url):
-        todo.cell(r, 9).hyperlink = url
-        todo.cell(r, 9).style = 'Hyperlink'
-    ref = todo.cell(r, 10)
-    ref.hyperlink = f"#'寄送名單'!A{ref.value}"
-    ref.value = f'第 {ref.value} 列'
-    ref.style = 'Hyperlink'
-for i, w_ in enumerate([6, 9, 12, 34, 70, 34, 36, 12, 40, 12], start=1):
-    todo.column_dimensions[get_column_letter(i)].width = w_
-todo.freeze_panes = 'D2'
-todo.auto_filter.ref = todo.dimensions
+    parts = []
+    for flag in w.value.split('；'):
+        detail = todo_detail(row, flag, notes_by_row[i - 2][1])
+        parts.append(f'{flag}\n→ {detail}' if detail else flag)
+    w.value = '\n'.join(parts)
+    w.alignment = Alignment(wrap_text=True, vertical='top')
 
 n = len(rows)
 cnt = lambda p: sum(1 for r in rows if r[6].startswith(p))
@@ -307,7 +284,7 @@ for line in [
     ['聯絡人（H～J 欄）', '報告書列多位聯絡人時只留職級最高者；一人多個職稱只留最高的（例：發言人暨總經理 → 總經理）。被移除的寫在 I、J 欄的註解（儲存格右上角紅色三角形）'],
     ['職級順序', '董事長 > 總經理/執行長 > 副總經理/財務長/永續長 > 協理/總監/處長 > 經理/副理 > 課長/主任/組長 > 專員/秘書/特助 > 發言人/公司治理主管/執行秘書等角色'],
     ['稱呼姓／稱呼職稱（K、L 欄）', '信件開頭用「K+L」，例：王經理、劉小姐、廖執行秘書；英文名只填名字（信件用「Wendy 您好」）；兩欄都空白時信件用「您好」。只有姓名沒有職稱的，依序用報告書原文、email 英文名、中文名字判斷「先生／小姐」（L 欄註解寫明依據；依名字沒把握的 L 欄黃底、W 欄標示，請確認）'],
-    ['需確認事項（W 欄）', '🔴 必須處理（紅底）、🟡 建議確認（黃底）；空白代表不需處理'],
+    ['需確認事項（W 欄）', '🔴 必須處理（紅底）、🟡 建議確認（黃底）；每項後面「→」寫明要確認什麼；空白代表不需處理'],
     ['報告書內文聯絡 email', '報告書 PDF 聯絡資訊段落裡寫的 email；少數公司申報資料填的 email 和報告書內文不同，部門/職稱/姓名是依報告書內文'],
     ['永續報告書聯絡資訊原文', '公司申報時填寫的原文，有些只留電話或網址，可參考後人工補 email'],
     [],
