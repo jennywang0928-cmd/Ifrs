@@ -22,6 +22,8 @@ def fix_emails(text):
     """抓 email，並修正 PDF 文字裡 email 被空格切斷的情況：
     「thomas _chen@x.com」→ thomas_chen@x.com、「pcchen@sinkang.com.t w」→ pcchen@sinkang.com.tw
     """
+    # 「郵件：r tm@x.com」→ rtm@x.com：帳號第一個字母被空格切開（前面是「E m a i l」這種分開的字母時不處理）
+    text = re.sub(r'(?<![A-Za-z] )(?<![A-Za-z0-9._%+\-@])([A-Za-z]) (?=[A-Za-z0-9._%+\-]+@)', r'\1', text)
     squeezed = EMAIL.findall(re.sub(r'(?<=[\x21-\x7e]) (?=[\x21-\x7e])', '', text))
     out = []
     for e in EMAIL.findall(text):
